@@ -1,0 +1,53 @@
+*filter
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+:INPUT DROP [0:0]
+#
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+#
+# Allow All for SSH
+-A INPUT -i eth0 -p tcp --dport 22 -j ACCEPT
+-A OUTPUT -o eth0 -p tcp --dport 22 -j ACCEPT
+#
+# Allow All for Apache
+-A INPUT -i eth0 -p tcp --dport 8080 -j ACCEPT
+-A OUTPUT -o eth0 -p tcp --dport 8080 -j ACCEPT
+#
+# Allow loopback traffic
+-A INPUT -i lo -j ACCEPT
+-A OUTPUT -o lo -j ACCEPT
+#    
+# Allow to be pinged ( Outside => srv )
+-A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+-A OUTPUT -p icmp --icmp-type echo-reply -j ACCEPT
+#
+# Allow to be pinged ( srv => Outside)
+-A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
+-A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT
+#
+# Allow outgoing DNS connections
+-A INPUT -p udp -i eth0 --sport 53 -j ACCEPT
+-A OUTPUT -p udp -o eth0 --dport 53 -j ACCEPT
+#
+# Allow incoming Samba
+-A INPUT -i eth0 -s 192.168.1.0/24 -p udp --dport 137:138 -m state --state NEW,ESTABLISHED -j ACCEPT
+-A OUTPUT -o eth0 -d 192.168.1.0/24 -p udp --sport 137:138 -m state --state ESTABLISHED -j ACCEPT
+-A INPUT -i eth0 -s 192.168.1.0/24 -p tcp --dport 139 -m state --state NEW,ESTABLISHED -j ACCEPT
+-A OUTPUT -o eth0 -d 192.168.1.0/24 -p tcp --sport 139 -m state --state ESTABLISHED -j ACCEPT
+#
+# Allow APT-GET
+#-A OUTPUT -o eth0 -p tcp -m tcp --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT
+-A OUTPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
+-A INPUT -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT
+#
+# Prevent DoS
+-A INPUT -p tcp --dport 80 -m connlimit --connlimit-above 100 --connlimit-mask 32 -j REJECT --reject-with tcp-reset
+#
+# Log dropped packets
+-N LOGGING
+-A INPUT -j LOGGING
+-A LOGGING -m limit --limit 2/min -j LOG --log-prefix "IPTables Packet Dropped: " --log-level 7
+-A LOGGING -j DROP
+#
+COMMIT
