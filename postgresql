@@ -1,2 +1,5 @@
 su -l postgres -c "/usr/local/pgsql/bin/pg_dump -p 5433 -Fc -f database.dump"
 su -l postgres -c "/usr/local/pgsql/bin/pg_restore -p 5433 -Fc -j 8 -v -d db_name database.dump"
+
+# check postgresql running port
+select setting from pg_settings where name = 'port';
