@@ -3,3 +3,6 @@ su -l postgres -c "/usr/local/pgsql/bin/pg_restore -p 5433 -Fc -j 8 -v -d db_nam
 
 # check postgresql running port
 select setting from pg_settings where name = 'port';
+
+# create fresh db with proper encoding
+CREATE DATABASE my_db_name WITH OWNER = postgres ENCODING = 'UTF8' TABLESPACE = pg_default LC_COLLATE = 'pl_PL.UTF-8' LC_CTYPE = 'pl_PL.UTF-8' CONNECTION LIMIT = -1;
