@@ -1,4 +1,4 @@
-# How to establish new VPN connection with .ovpn configuration file (Ubuntu 14.04)
+#How to establish new VPN connection with .ovpn configuration file (Ubuntu 14.04)
 
 1) Execute the following commands in your Ubuntu terminal:
 sudo apt-get install network-manager-vpnc openvpn network-manager-openvpn network-manager-openvpn-gnome
